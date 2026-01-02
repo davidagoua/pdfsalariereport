@@ -167,7 +167,7 @@
             
             processedData.forEach((item, index) => {
                 const tr = document.createElement('tr');
-                const isMatched = item.status === 'MATCHED';
+                const isMatched = item.status === 'TROUVE';
                 const statusColor = isMatched ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
                 const statusIcon = isMatched ? 'check-circle' : 'alert-circle';
                 
