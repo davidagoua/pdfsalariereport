@@ -177,14 +177,28 @@
 
             processedData.forEach((item, index) => {
                 const tr = document.createElement('tr');
-                const isMatched = item.status === 'TROUVE';
-                const statusColor = isMatched ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
-                const statusIcon = isMatched ? 'check-circle' : 'alert-circle';
+
+                // Determine style based on status
+                let statusColor = 'text-gray-600 bg-gray-50';
+                let canSelect = false;
+
+                if (item.status === 'TROUVE') {
+                    statusColor = 'text-blue-600 bg-blue-50';
+                    canSelect = true;
+                } else if (item.status === 'NON TROUVE') {
+                    statusColor = 'text-red-600 bg-red-50';
+                } else if (item.status === 'ENVOYÉ') {
+                    statusColor = 'text-green-600 bg-green-50';
+                    canSelect = true;
+                } else if (item.status === 'ÉCHEC') {
+                    statusColor = 'text-orange-600 bg-orange-50';
+                    canSelect = true;
+                }
 
                 tr.innerHTML = `
                     <td class="p-4">
                         <input type="checkbox" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                        data-index="${index}" ${isMatched ? 'checked' : 'disabled'}>
+                        data-index="${index}" ${canSelect ? '' : 'disabled'}>
                     </td>
                     <td class="p-4 font-medium text-slate-700">${item.id}</td>
                     <td class="p-4">${item.name || '<span class="text-gray-400 italic">Inconnu</span>'}</td>
@@ -194,7 +208,7 @@
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusColor}">
                             ${item.status}
                         </span>
-                        ${isMatched ? `
+                        ${item.status !== 'NON TROUVE' ? `
                             <a href="/files/${item.filename}" download target="_blank" class="text-slate-400 hover:text-blue-600 transition-colors" title="Télécharger">
                                 <i data-lucide="download" class="w-5 h-5"></i>
                             </a>

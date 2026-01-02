@@ -7,10 +7,10 @@ import os
 logger = logging.getLogger(__name__)
 
 # Placeholder configuration - User needs to update this or provide env vars
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.office365.com") # Default to Outlook as per request
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com") # Default to Outlook as per request
 SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-SMTP_USER = os.getenv("SMTP_USER", "herve.koffi@cperformers.com")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "CHANGE_ME")
+SMTP_USER = os.getenv("SMTP_USER", "cdavidagoua@gmail.com")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "fjnx sobn aize miif ")
 
 def send_email(to_email: str, subject: str, body: str, attachment_paths: list[str] = None):
     """
@@ -23,7 +23,7 @@ def send_email(to_email: str, subject: str, body: str, attachment_paths: list[st
     msg = EmailMessage()
     msg['Subject'] = subject
     msg['From'] = SMTP_USER
-    msg['To'] = to_email
+    msg['To'] = 'herve.koffi@cperformers.com'
     msg.set_content(body)
 
     if attachment_paths:

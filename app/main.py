@@ -88,39 +88,83 @@ async def preview_processing(pdf_file: UploadFile = File(...), excel_file: Uploa
         logger.error(f"Error in preview: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/send")
-async def send_emails(request: SendRequest):
+from fastapi import BackgroundTasks
+import uuid
+
+# Memory storage for job results
+# Format: { job_id: { "status": "processing"|"completed", "details": [ {id, status, error} ] } }
+jobs_db = {}
+
+def process_email_batch(job_id: str, recipients: List[EmployeeSelection], subject: str, body: str):
     """
-    Iterates over the selected recipients and sends emails.
+    Background task to process emails.
     """
     results = []
-    for recipient in request.recipients:
+    logger.info(f"Starting email batch job {job_id} for {len(recipients)} recipients.")
+    
+    for recipient in recipients:
+        result_entry = {"id": recipient.id, "email": recipient.email}
         
         # Verify file existence
-        file_path = recipient.path
-        if not os.path.exists(file_path):
-            results.append({"id": recipient.id, "status": "failed", "error": "File not found"})
+        if not os.path.exists(recipient.path):
+            result_entry["status"] = "failed"
+            result_entry["error"] = "File not found"
+            results.append(result_entry)
             continue
             
         if not recipient.email:
-             results.append({"id": recipient.id, "status": "skipped", "error": "No email provided"})
+             result_entry["status"] = "skipped"
+             result_entry["error"] = "No email provided"
+             results.append(result_entry)
              continue
 
         # Send Email
         success = send_email(
             to_email=recipient.email,
-            subject=request.subject,
-            body=request.body,
-            attachment_paths=[file_path]
+            subject=subject,
+            body=body,
+            attachment_paths=[recipient.path]
         )
         
-        results.append({
-            "id": recipient.id,
-            "status": "sent" if success else "failed",
-            "email": recipient.email
-        })
+        result_entry["status"] = "sent" if success else "failed"
+        results.append(result_entry)
         
-    return {"results": results}
+        # Update job progress in real-time (optional, here we just append)
+        jobs_db[job_id]["details"] = results
+
+    jobs_db[job_id]["status"] = "completed"
+    logger.info(f"Job {job_id} completed.")
+
+@app.post("/api/send")
+async def send_emails_background(request: SendRequest, background_tasks: BackgroundTasks):
+    """
+    Triggers background email sending. Returns a Job ID.
+    """
+    job_id = str(uuid.uuid4())
+    jobs_db[job_id] = {
+        "status": "processing",
+        "details": []
+    }
+    
+    background_tasks.add_task(
+        process_email_batch, 
+        job_id, 
+        request.recipients, 
+        request.subject, 
+        request.body
+    )
+    
+    return {"job_id": job_id, "status": "processing"}
+
+@app.get("/api/job/{job_id}")
+async def get_job_status(job_id: str):
+    """
+    Returns the status of a background job.
+    """
+    if job_id not in jobs_db:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    return jobs_db[job_id]
 
 # Serve Static Files (Frontend)
 app.mount("/files", StaticFiles(directory=COMPLETED_DIR), name="files")
