@@ -123,4 +123,5 @@ async def send_emails(request: SendRequest):
     return {"results": results}
 
 # Serve Static Files (Frontend)
+app.mount("/files", StaticFiles(directory=COMPLETED_DIR), name="files")
 app.mount("/", StaticFiles(directory="app/static", html=True), name="static")

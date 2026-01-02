@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,10 +15,11 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100 min-h-screen text-slate-800 font-sans">
-    
+
     <div class="max-w-7xl mx-auto px-4 py-10">
-        
+
 
 
         <!-- Upload Section -->
@@ -27,13 +28,15 @@
                 <i data-lucide="upload-cloud" class="w-6 h-6 text-blue-600"></i>
                 Importation des Fichiers
             </h2>
-            
+
             <form id="uploadForm" class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- PDF Input -->
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-slate-700">Fichier PDF (Bulletins)</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors bg-white/50 relative">
-                        <input type="file" id="pdfFile" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                    <div
+                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors bg-white/50 relative">
+                        <input type="file" id="pdfFile" accept=".pdf"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
                         <i data-lucide="file-text" class="w-10 h-10 mx-auto text-gray-400 mb-2"></i>
                         <p class="text-sm text-gray-500" id="pdfName">Cliquez ou glissez le PDF ici</p>
                     </div>
@@ -42,8 +45,10 @@
                 <!-- Excel Input -->
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-slate-700">Fichier Excel (Emails)</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors bg-white/50 relative">
-                        <input type="file" id="excelFile" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                    <div
+                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors bg-white/50 relative">
+                        <input type="file" id="excelFile" accept=".xlsx, .xls"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
                         <i data-lucide="sheet" class="w-10 h-10 mx-auto text-gray-400 mb-2"></i>
                         <p class="text-sm text-gray-500" id="excelName">Cliquez ou glissez l'Excel ici</p>
                     </div>
@@ -51,7 +56,8 @@
             </form>
 
             <div class="mt-8 flex justify-end">
-                <button onclick="processFiles()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                <button onclick="processFiles()"
+                    class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
                     <i data-lucide="play" class="w-4 h-4"></i>
                     Lancer l'analyse
                 </button>
@@ -65,10 +71,12 @@
                     <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
                     Aperçu des Envois (<span id="count">0</span>)
                 </h2>
-                
+
                 <div class="flex gap-4">
-                    <button onclick="toggleSelectAll()" class="text-slate-600 hover:text-slate-900 text-sm font-medium">Tout sélectionner</button>
-                    <button onclick="sendEmails()" id="sendBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button onclick="toggleSelectAll()"
+                        class="text-slate-600 hover:text-slate-900 text-sm font-medium">Tout sélectionner</button>
+                    <button onclick="sendEmails()" id="sendBtn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <i data-lucide="send" class="w-4 h-4"></i>
                         Envoyer les emails
                     </button>
@@ -79,7 +87,8 @@
                 <table class="w-full text-left bg-white">
                     <thead class="bg-slate-50 text-slate-500 font-medium text-sm uppercase">
                         <tr>
-                            <th class="p-4 w-10"><input type="checkbox" id="masterCheckbox" onchange="toggleSelectAll()"></th>
+                            <th class="p-4 w-10"><input type="checkbox" id="masterCheckbox"
+                                    onchange="toggleSelectAll()"></th>
                             <th class="p-4">Matricule</th>
                             <th class="p-4">Employé (Détecté)</th>
                             <th class="p-4">Email</th>
@@ -97,7 +106,8 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <div id="toast"
+        class="fixed bottom-5 right-5 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50">
         <div class="flex items-center gap-3">
             <i data-lucide="info" id="toastIcon"></i>
             <span id="toastMsg">Notification</span>
@@ -116,7 +126,7 @@
             document.getElementById('excelName').innerText = e.target.files[0]?.name || "Cliquez ou glissez l'Excel ici";
         });
 
-        function showToast(msg, type='info') {
+        function showToast(msg, type = 'info') {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
             toast.classList.remove('translate-y-20', 'opacity-0');
@@ -139,15 +149,15 @@
             formData.append('excel_file', excelFiles[0]);
 
             showToast("Analyse en cours...");
-            
+
             try {
                 const response = await fetch('/api/preview', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 if (!response.ok) throw new Error("Erreur serveur");
-                
+
                 const result = await response.json();
                 processedData = result.data;
                 renderTable();
@@ -164,13 +174,13 @@
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            
+
             processedData.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 const isMatched = item.status === 'TROUVE';
                 const statusColor = isMatched ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
                 const statusIcon = isMatched ? 'check-circle' : 'alert-circle';
-                
+
                 tr.innerHTML = `
                     <td class="p-4">
                         <input type="checkbox" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
@@ -180,15 +190,21 @@
                     <td class="p-4">${item.name || '<span class="text-gray-400 italic">Inconnu</span>'}</td>
                     <td class="p-4 max-w-xs truncate">${item.email || '-'}</td>
                     <td class="p-4 font-mono text-xs text-slate-500">${item.filename}</td>
-                    <td class="p-4">
+                    <td class="p-4 flex items-center gap-3">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusColor}">
                             ${item.status}
                         </span>
+                        ${isMatched ? `
+                            <a href="/files/${item.filename}" download target="_blank" class="text-slate-400 hover:text-blue-600 transition-colors" title="Télécharger">
+                                <i data-lucide="download" class="w-5 h-5"></i>
+                            </a>
+                        ` : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
             updateSendButton();
+            lucide.createIcons();
         }
 
         function toggleSelectAll() {
@@ -216,26 +232,27 @@
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             const selectedIndices = Array.from(checkedBoxes).map(cb => cb.dataset.index);
             const recipients = selectedIndices.map(i => processedData[i]);
-            
+
             if (!confirm(`Voulez-vous vraiment envoyer ${recipients.length} emails ?`)) return;
 
             showToast("Envoi en cours...");
-            
+
             try {
                 const response = await fetch('/api/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ recipients })
                 });
-                
+
                 const result = await response.json();
                 console.log(result);
                 showToast("Emails envoyés (voir console pour détails)");
-                
+
             } catch (error) {
                 showToast("Erreur lors de l'envoi");
             }
         }
     </script>
 </body>
+
 </html>
