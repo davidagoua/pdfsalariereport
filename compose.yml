@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    container_name: pdfsalarie_app
+    ports:
+      - "8000:8000"
+    volumes:
+      # Map the local assets folder to the container to persist files and logs
+      - ./assets:/app/assets
+    environment:
+      - SMTP_HOST=smtp.office365.com
+      - SMTP_PORT=587
+      - SMTP_USER=herve.koffi@cperformers.com
+      - SMTP_PASSWORD=CHANGE_ME
+    restart: unless-stopped

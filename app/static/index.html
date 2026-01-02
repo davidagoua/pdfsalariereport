@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performers - Automatisation Paie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-slate-800 font-sans">
+    
+    <div class="max-w-7xl mx-auto px-4 py-10">
+        
+
+
+        <!-- Upload Section -->
+        <div class="glass rounded-2xl shadow-xl p-8 mb-8 border border-white">
+            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="w-6 h-6 text-blue-600"></i>
+                Importation des Fichiers
+            </h2>
+            
+            <form id="uploadForm" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- PDF Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-slate-700">Fichier PDF (Bulletins)</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors bg-white/50 relative">
+                        <input type="file" id="pdfFile" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                        <i data-lucide="file-text" class="w-10 h-10 mx-auto text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500" id="pdfName">Cliquez ou glissez le PDF ici</p>
+                    </div>
+                </div>
+
+                <!-- Excel Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-slate-700">Fichier Excel (Emails)</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors bg-white/50 relative">
+                        <input type="file" id="excelFile" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                        <i data-lucide="sheet" class="w-10 h-10 mx-auto text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500" id="excelName">Cliquez ou glissez l'Excel ici</p>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-8 flex justify-end">
+                <button onclick="processFiles()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                    <i data-lucide="play" class="w-4 h-4"></i>
+                    Lancer l'analyse
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="resultsSection" class="hidden glass rounded-2xl shadow-xl p-8 border border-white">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
+                    Aperçu des Envois (<span id="count">0</span>)
+                </h2>
+                
+                <div class="flex gap-4">
+                    <button onclick="toggleSelectAll()" class="text-slate-600 hover:text-slate-900 text-sm font-medium">Tout sélectionner</button>
+                    <button onclick="sendEmails()" id="sendBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        Envoyer les emails
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+                <table class="w-full text-left bg-white">
+                    <thead class="bg-slate-50 text-slate-500 font-medium text-sm uppercase">
+                        <tr>
+                            <th class="p-4 w-10"><input type="checkbox" id="masterCheckbox" onchange="toggleSelectAll()"></th>
+                            <th class="p-4">Matricule</th>
+                            <th class="p-4">Employé (Détecté)</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Fichier Généré</th>
+                            <th class="p-4">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100 text-sm">
+                        <!-- Rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="flex items-center gap-3">
+            <i data-lucide="info" id="toastIcon"></i>
+            <span id="toastMsg">Notification</span>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let processedData = [];
+
+        // File Input Listeners
+        document.getElementById('pdfFile').addEventListener('change', (e) => {
+            document.getElementById('pdfName').innerText = e.target.files[0]?.name || "Cliquez ou glissez le PDF ici";
+        });
+        document.getElementById('excelFile').addEventListener('change', (e) => {
+            document.getElementById('excelName').innerText = e.target.files[0]?.name || "Cliquez ou glissez l'Excel ici";
+        });
+
+        function showToast(msg, type='info') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
+
+        async function processFiles() {
+            const pdfFiles = document.getElementById('pdfFile').files;
+            const excelFiles = document.getElementById('excelFile').files;
+
+            if (pdfFiles.length === 0 || excelFiles.length === 0) {
+                showToast("Veuillez sélectionner les deux fichiers.", "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pdf_file', pdfFiles[0]);
+            formData.append('excel_file', excelFiles[0]);
+
+            showToast("Analyse en cours...");
+            
+            try {
+                const response = await fetch('/api/preview', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error("Erreur serveur");
+                
+                const result = await response.json();
+                processedData = result.data;
+                renderTable();
+                document.getElementById('resultsSection').classList.remove('hidden');
+                document.getElementById('count').innerText = processedData.length;
+                showToast("Analyse terminée avec succès !");
+
+            } catch (error) {
+                showToast("Erreur lors de l'analyse : " + error.message);
+                console.error(error);
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            processedData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const isMatched = item.status === 'MATCHED';
+                const statusColor = isMatched ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+                const statusIcon = isMatched ? 'check-circle' : 'alert-circle';
+                
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <input type="checkbox" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                        data-index="${index}" ${isMatched ? 'checked' : 'disabled'}>
+                    </td>
+                    <td class="p-4 font-medium text-slate-700">${item.id}</td>
+                    <td class="p-4">${item.name || '<span class="text-gray-400 italic">Inconnu</span>'}</td>
+                    <td class="p-4 max-w-xs truncate">${item.email || '-'}</td>
+                    <td class="p-4 font-mono text-xs text-slate-500">${item.filename}</td>
+                    <td class="p-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusColor}">
+                            ${item.status}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateSendButton();
+        }
+
+        function toggleSelectAll() {
+            const master = document.getElementById('masterCheckbox');
+            const checkboxes = document.querySelectorAll('.row-checkbox:not([disabled])');
+            checkboxes.forEach(cb => cb.checked = master.checked);
+            updateSendButton();
+        }
+
+        function updateSendButton() {
+            const checked = document.querySelectorAll('.row-checkbox:checked').length;
+            const btn = document.getElementById('sendBtn');
+            btn.innerText = `Envoyer (${checked})`;
+            btn.disabled = checked === 0;
+        }
+
+        // Attach listener for individual checks
+        document.getElementById('tableBody').addEventListener('change', (e) => {
+            if (e.target.classList.contains('row-checkbox')) {
+                updateSendButton();
+            }
+        });
+
+        async function sendEmails() {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            const selectedIndices = Array.from(checkedBoxes).map(cb => cb.dataset.index);
+            const recipients = selectedIndices.map(i => processedData[i]);
+            
+            if (!confirm(`Voulez-vous vraiment envoyer ${recipients.length} emails ?`)) return;
+
+            showToast("Envoi en cours...");
+            
+            try {
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipients })
+                });
+                
+                const result = await response.json();
+                console.log(result);
+                showToast("Emails envoyés (voir console pour détails)");
+                
+            } catch (error) {
+                showToast("Erreur lors de l'envoi");
+            }
+        }
+    </script>
+</body>
+</html>
