@@ -73,6 +73,10 @@
                 </h2>
 
                 <div class="flex gap-4">
+                    <button onclick="downloadAll()" id="downloadAllBtn"
+                        class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="download" class="inline w-4 h-4 mr-1"></i> Tout Télécharger
+                    </button>
                     <button onclick="toggleSelectAll()"
                         class="text-slate-600 hover:text-slate-900 text-sm font-medium">Tout sélectionner</button>
                     <button onclick="sendEmails()" id="sendBtn"
@@ -168,6 +172,43 @@
             } catch (error) {
                 showToast("Erreur lors de l'analyse : " + error.message);
                 console.error(error);
+            }
+        }
+
+        async function downloadAll() {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            const selectedIndices = Array.from(checkedBoxes).map(cb => cb.dataset.index);
+            const files = selectedIndices.map(i => processedData[i].filename);
+
+            if (files.length === 0) {
+                showToast("Veuillez sélectionner au moins un fichier.", "error");
+                return;
+            }
+
+            showToast("Préparation du téléchargement...");
+
+            try {
+                const response = await fetch('/api/download-zip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files })
+                });
+
+                if (!response.ok) throw new Error("Erreur lors de la création du ZIP");
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "bulletins.zip";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                showToast("Téléchargement lancé !");
+            } catch (error) {
+                console.error(error);
+                showToast("Erreur téléchargement.");
             }
         }
 
