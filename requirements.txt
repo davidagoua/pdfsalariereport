@@ -3,4 +3,7 @@ uvicorn
 pypdf
 pandas
 openpyxl
+
 python-multipart
+sqlalchemy
+jinja2
