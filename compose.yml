@@ -3,7 +3,7 @@ services:
     build: .
     container_name: pdfsalarie_app
     ports:
-      - "8000:8000"
+      - "${APP_PORT}:8000"
     volumes:
       # Map the local assets folder to the container to persist files and logs
       - ./assets:/app/assets
