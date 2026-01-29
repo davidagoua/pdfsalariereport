@@ -41,3 +41,43 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+# Employee Schemas
+class EmployeeDocumentResponse(BaseModel):
+    id: str
+    filename: str
+    period: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class EmployeeResponse(BaseModel):
+    id: str
+    matricule: str
+    name: str
+    email: str
+    created_at: datetime
+    latest_document: Optional[EmployeeDocumentResponse] = None
+
+    class Config:
+        from_attributes = True
+# History / Job Schemas
+class EmailLogResponse(BaseModel):
+    id: str
+    recipient_email: str
+    status: str
+    error_message: Optional[str] = None
+    filename: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+class JobResponse(BaseModel):
+    id: str
+    status: str
+    created_at: datetime
+    email_logs: List[EmailLogResponse] = []
+
+    class Config:
+        from_attributes = True

@@ -36,3 +36,26 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     full_name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Employee(Base):
+    __tablename__ = "employees"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    matricule = Column(String, unique=True, index=True)
+    name = Column(String)
+    email = Column(String, unique=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    documents = relationship("EmployeeDocument", back_populates="employee")
+
+class EmployeeDocument(Base):
+    __tablename__ = "employee_documents"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    employee_id = Column(String, ForeignKey("employees.id"))
+    filename = Column(String)
+    period = Column(String)
+    path = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    employee = relationship("Employee", back_populates="documents")
