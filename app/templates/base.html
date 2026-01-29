@@ -38,19 +38,19 @@
                     <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
                     <span>Tableau de bord</span>
                 </a>
-                <a href="/"
+                <a href="/salaries"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all group">
                     <i data-lucide="users" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
                     <span>Salariés</span>
                 </a>
 
-                <a href="#"
+                <a href="/historique"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all group">
                     <i data-lucide="history" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
                     <span>Historique</span>
                 </a>
 
-                <a href="#"
+                <a href="/parametres"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all group">
                     <i data-lucide="settings" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
                     <span>Paramètres</span>
@@ -58,13 +58,13 @@
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="p-4 border-t border-slate-800">
+            <div class="p-4 border-t border-slate-800" id="sidebarFooter">
                 <div class="flex items-center gap-3 px-2">
-                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">A
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium">Admin User</p>
-                        <p class="text-xs text-slate-500">admin@performers.com</p>
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold"
+                        id="userInitial">A</div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-medium truncate" id="userName">Chargement...</p>
+                        <p class="text-xs text-slate-500 truncate" id="userEmail">...</p>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,8 @@
                             class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                     </button>
                     <div class="h-8 w-px bg-gray-200 mx-1"></div>
-                    <button class="text-sm font-medium text-slate-600 hover:text-slate-900">Déconnexion</button>
+                    <button id="logoutBtn"
+                        class="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors">Déconnexion</button>
                 </div>
             </header>
 
@@ -109,6 +110,28 @@
 
     <script>
         lucide.createIcons();
+
+        // Fetch user info (no need to check token manually, middleware handles it)
+        fetch('/api/auth/me')
+            .then(res => {
+                if (res.ok) return res.json();
+                throw new Error('Not logged in');
+            })
+            .then(user => {
+                if (user) {
+                    document.getElementById('userName').innerText = user.full_name || user.username;
+                    document.getElementById('userEmail').innerText = user.email;
+                    document.getElementById('userInitial').innerText = (user.full_name || user.username).charAt(0).toUpperCase();
+                }
+            })
+            .catch(err => {
+                console.warn('Profile fetch failed:', err);
+            });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        });
     </script>
     {% block scripts %}{% endblock %}
 </body>

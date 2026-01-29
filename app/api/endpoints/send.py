@@ -1,19 +1,19 @@
-
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 import uuid
 import os
 import logging
 from typing import List
-from app.models.schemas import SendRequest, EmployeeSelection
+from app.api import deps
+from app.models import models, schemas
 from app.services.email_service import send_email
-from app.core.database import get_db, SessionLocal
-from app.models.models import Job, EmailLog
+from app.core.database import SessionLocal 
+from app.models.models import Job, EmailLog 
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-def process_email_batch(job_id: str, recipients: List[EmployeeSelection], subject: str, body: str):
+def process_email_batch(job_id: str, recipients: List[schemas.EmployeeSelection], subject: str, body: str):
     """
     Background task to process emails and update DB.
     We create a NEW session here because this runs in a background thread.
@@ -82,7 +82,12 @@ def process_email_batch(job_id: str, recipients: List[EmployeeSelection], subjec
         db.close()
 
 @router.post("/send")
-async def send_emails_background(request: SendRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def send_emails(
+    request: schemas.SendRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
     """
     Triggers background email sending. Returns a Job ID.
     Job is created in DB immediately.
@@ -104,8 +109,12 @@ async def send_emails_background(request: SendRequest, background_tasks: Backgro
     
     return {"job_id": job_id, "status": "processing"}
 
-@router.get("/job/{job_id}")
-async def get_job_status(job_id: str, db: Session = Depends(get_db)):
+@router.get("/status/{job_id}")
+async def get_status(
+    job_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
     """
     Returns the status of a background job from DB.
     """

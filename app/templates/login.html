@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Solution PDF Salarié</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .bg-gradient {
+            background: radial-gradient(circle at top right, #3b82f633, transparent),
+                radial-gradient(circle at bottom left, #8b5cf633, transparent);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gray-50 text-slate-800 font-sans antialiased bg-gradient min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full">
+        <div class="text-center mb-10">
+            <div
+                class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200 mb-6">
+                <i data-lucide="layers" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-slate-900">Bienvenue</h1>
+            <p class="text-slate-500 mt-2">Connectez-vous pour accéder à votre espace</p>
+        </div>
+
+        <div class="glass rounded-3xl shadow-2xl p-8 sm:p-10">
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Nom
+                        d'utilisateur</label>
+                    <div class="relative">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </div>
+                        <input type="text" id="username" name="username" required
+                            class="block w-full pl-11 pr-4 py-3 bg-white/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                            placeholder="votre_nom">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">Mot de passe</label>
+                    <div class="relative">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                        <input type="password" id="password" name="password" required
+                            class="block w-full pl-11 pr-4 py-3 bg-white/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div id="errorMessage"
+                    class="hidden text-sm text-red-600 bg-red-50 p-3 rounded-lg flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span>Identifiants incorrects</span>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95">
+                    <span>Se connecter</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center mt-8 text-slate-500 text-sm">
+            &copy; 2026. Tous droits réservés.
+        </p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        loginForm.onsubmit = async (e) => {
+            e.preventDefault();
+            errorMessage.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Connexion...</span>';
+            lucide.createIcons();
+
+            const formData = new FormData(loginForm);
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    errorMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.classList.remove('hidden');
+                errorMessage.querySelector('span').innerText = 'Erreur de connexion au serveur';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Se connecter</span><i data-lucide="arrow-right" class="w-5 h-5"></i>';
+                lucide.createIcons();
+            }
+        };
+    </script>
+</body>
+
+</html>

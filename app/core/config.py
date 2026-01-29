@@ -13,6 +13,12 @@ class Settings:
     SMTP_USER = os.getenv("SMTP_USER", "herve.koffi@cperformers.com")
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
     
+    # Auth
+    SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-change-me")
+    ALGORITHM = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
+    COOKIE_NAME = "access_token"
+    
     # Ensure directories exist
     @classmethod
     def ensure_dirs(cls):

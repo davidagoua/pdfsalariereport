@@ -1,16 +1,20 @@
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 import zipfile
 import os
 import uuid
 from app.models.schemas import DownloadRequest
 from app.core.config import settings
+from app.api import deps
+from app.models import models
 
 router = APIRouter()
 
 @router.post("/download-zip")
-async def download_zip(request: DownloadRequest):
+async def download_zip(
+    request: DownloadRequest,
+    current_user: models.User = Depends(deps.get_current_user)
+):
     """
     Creates a ZIP file containing the requested PDFs.
     """

@@ -1,17 +1,20 @@
-
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 import shutil
 import os
 import logging
 from app.core.config import settings
 from app.utils.excel_parser import parse_excel
-from app.services.pdf_service import process_pdf_splits
+from app.api import deps
+from app.models import models
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.post("/preview")
-async def preview_processing(pdf_file: UploadFile = File(...), excel_file: UploadFile = File(...)):
+async def preview_pdf(
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(deps.get_current_user)
+):
     """
     1. Saves uploaded files.
     2. Parses Excel for mapping.

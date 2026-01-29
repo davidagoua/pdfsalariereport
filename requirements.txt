@@ -3,7 +3,10 @@ uvicorn
 pypdf
 pandas
 openpyxl
-
+psycopg2-binary
 python-multipart
 sqlalchemy
 jinja2
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==3.2.0

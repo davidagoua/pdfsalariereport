@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.api.api import api_router
 from app.api.endpoints import web
 from app.core.database import engine, Base
+from app.core.auth_middleware import AuthMiddleware
 
 # Create Tables
 Base.metadata.create_all(bind=engine)
@@ -27,11 +28,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(AuthMiddleware)
+
 # API Routes
 app.include_router(api_router, prefix="/api")
 app.include_router(web.router)
 
-# Static Files
+
 app.mount("/files", StaticFiles(directory=settings.COMPLETED_DIR), name="files")
-# Mount static assets at /static
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
