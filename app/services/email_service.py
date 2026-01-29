@@ -26,7 +26,7 @@ def send_email(to_email: str, subject: str, body: str, attachment_paths: list[st
     msg = EmailMessage()
     msg['Subject'] = subject
     msg['From'] = SMTP_USER
-    msg['To'] = "cdavidagoua@gmail.com"
+    msg['To'] = to_email
     msg.set_content(body)
 
     if attachment_paths:
